@@ -3,179 +3,11 @@ import io
 from io import BytesIO  # Этот класс поможет нам сделать картинку из потока байт
 
 from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow
+from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QPushButton, QLineEdit
 from PyQt6 import uic  # Импортируем uic
 
 import requests
 from PIL import Image
-
-
-dis = """<?xml version="1.0" encoding="UTF-8"?>
-<ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>800</width>
-    <height>600</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>MainWindow</string>
-  </property>
-  <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="widht_lineEdit">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>470</y>
-      <width>113</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="longitude_lineEdit">
-    <property name="geometry">
-     <rect>
-      <x>200</x>
-      <y>470</y>
-      <width>113</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="search_button">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>500</y>
-      <width>171</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>22</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Поиск</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="scale_lineEdtit">
-    <property name="geometry">
-     <rect>
-      <x>520</x>
-      <y>470</y>
-      <width>161</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>410</y>
-      <width>211</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Координаты</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignHCenter|Qt::AlignTop</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>440</y>
-      <width>55</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Широта</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>440</y>
-      <width>55</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Долгота</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>520</x>
-      <y>419</y>
-      <width>161</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>9</pointsize>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Машттаб (В градусах)</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>10</y>
-      <width>731</width>
-      <height>391</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>26</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
- </widget>
- <resources/>
- <connections/>
-</ui>
-
-"""
 
 
 # Пусть наше приложение предполагает запуск:
@@ -187,17 +19,29 @@ SESSION = requests.session()
 class Map_deckstop(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('untitled.ui', self)  # Загружаем дизайн
+        self.setGeometry(300, 50, 700, 700)
+        self.search_button = QPushButton('Поиск', self)
+        self.search_button.setGeometry(300, 630, 100, 30)
+        self.latitude = QLineEdit(self)
+        self.latitude.setGeometry(10, 590, 100, 20)
+        QLabel('Широта', self).setGeometry(10, 570, 100, 20)
+        self.longitude = QLineEdit(self)
+        self.longitude.setGeometry(200, 590, 100, 20)
+        QLabel('Долгота', self).setGeometry(200, 570, 100, 20)
+        self.scale = QLineEdit(self)
+        self.scale.setGeometry(500, 590, 100, 20)
+        QLabel('Размер', self).setGeometry(500, 570, 100, 20)
+        self.map_label = QLabel(self)
+        self.map_label.setGeometry(5, 5, 500, 500)
         self.search_button.clicked.connect(self.run)
-        # Обратите внимание: имя элемента такое же как в QTDesigner
 
     def run(self):
 
-        coords = ['60', '60']
+        coords = [self.latitude.text(), self.longitude.text()]
 
         # geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
 
-        delta = self.scale_line.text()
+        delta = self.scale.text()
         apikey = "f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
 
         # Собираем параметры для запроса к StaticMapsAPI:
@@ -212,12 +56,16 @@ class Map_deckstop(QMainWindow):
         # ... и выполняем запрос
         response = requests.get(map_api_server, params=map_params)
         im = BytesIO(response.content)
+        print(im)
         Image.open(im).show()
+        print(0)
         self.pixmap = QPixmap(Image.open(im))
+        print(1)
         # Если картинки нет, то QPixmap будет пустым,
         # а исключения не будет
         # Отображаем содержимое QPixmap в объекте QLabel
         self.map_label.setPixmap(self.pixmap)
+        print(2)
 
 
 if __name__ == '__main__':
@@ -228,3 +76,5 @@ if __name__ == '__main__':
 
 
 SESSION.close()
+
+
